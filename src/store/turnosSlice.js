@@ -14,7 +14,7 @@ const calcularPersonaTrabajando = (fecha, fechaInicioCarmen = '2024-09-07') => {
     return null;
   }
   
-  // Cada día alterna la persona (sistema 24×36)
+  // Cada día alterna la persona (sistema 12×36)
   // Carmen empieza, entonces:
   // Día 0: Carmen
   // Día 1: Azucena  

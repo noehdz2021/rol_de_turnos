@@ -1,6 +1,6 @@
-# 🏥 TurnosApp - Sistema de Turnos 24×36
+# 🏥 TurnosApp - Sistema de Turnos 12×36
 
-Aplicación web para gestionar turnos de trabajo entre **Azucena Hernández** y **Carmen Hernández** con sistema de rotación 24×36 (un día de trabajo, un día de descanso).
+Aplicación web para gestionar turnos de trabajo entre **Azucena Hernández** y **Carmen Hernández** con sistema de rotación 12×36 (12 horas de trabajo, 36 horas de descanso).
 
 ![React](https://img.shields.io/badge/React-18-blue.svg)
 ![Vite](https://img.shields.io/badge/Vite-7.1.4-purple.svg)
@@ -44,10 +44,10 @@ Luego abre `http://localhost:5173/` en tu navegador.
 
 ## 📅 Sistema de Turnos
 
-### Lógica del Sistema 24×36:
+### Lógica del Sistema 12×36:
 - **Carmen Hernández** inicia los turnos (fecha configurable)
 - **Alternancia diaria automática**: Carmen → Azucena → Carmen → Azucena...
-- **24 horas** de trabajo seguidas de **36 horas** de descanso
+- **12 horas** de trabajo seguidas de **36 horas** de descanso
 - **Cálculo preciso** para cualquier fecha pasada o futura
 
 ### Ejemplo de Rotación:
@@ -170,9 +170,9 @@ turnos-app/
 ## 🎯 Casos de Uso
 
 - **Hospitales y Clínicas** - Gestión de turnos médicos
-- **Empresas 24/7** - Turnos de seguridad, producción
+- **Empresas de servicios** - Turnos de seguridad, atención al cliente
 - **Servicios de Emergencia** - Rotación de personal
-- **Cualquier trabajo** con sistema 24×36
+- **Cualquier trabajo** con sistema 12×36
 
 ## 🤝 Contribuciones
 

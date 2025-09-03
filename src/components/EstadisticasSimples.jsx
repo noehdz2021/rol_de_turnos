@@ -117,7 +117,7 @@ const EstadisticasSimples = () => {
 
         <div className="card" style={{ textAlign: 'center', padding: '1rem' }}>
           <div style={{ fontSize: 'clamp(1.5rem, 5vw, 2rem)', fontWeight: 'bold', color: '#10b981', marginBottom: '0.5rem' }}>
-            24×36
+            12×36
           </div>
           <div style={{ color: '#6b7280', fontSize: 'clamp(0.75rem, 2vw, 0.875rem)' }}>Sistema de Turnos</div>
           <div style={{ fontSize: '0.75rem', color: '#9ca3af', marginTop: '0.25rem' }}>Rotación diaria</div>

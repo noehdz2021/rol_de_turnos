@@ -43,7 +43,7 @@ const NavbarSimple = () => {
               TurnosApp
             </h1>
             <p style={{ fontSize: '0.75rem', color: '#6b7280' }}>
-              Sistema 24×36
+              Sistema 12×36
             </p>
           </div>
         </div>

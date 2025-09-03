@@ -215,11 +215,11 @@ const ConfiguracionSimple = () => {
           borderRadius: '8px' 
         }}>
           <h4 style={{ fontWeight: '500', color: '#1f2937', marginBottom: '0.5rem' }}>
-            Sistema de Turnos 24×36
+            Sistema de Turnos 12×36
           </h4>
           <ul style={{ fontSize: '0.875rem', color: '#6b7280', lineHeight: '1.5' }}>
-            <li>• Cada trabajadora trabaja un día completo (24 horas)</li>
-            <li>• Luego descansa el día siguiente (36 horas de descanso)</li>
+            <li>• Cada trabajadora trabaja un turno de 12 horas</li>
+            <li>• Luego descansa 36 horas (día y medio de descanso)</li>
             <li>• Los turnos se alternan automáticamente</li>
             <li>• La primera trabajadora inicia según la fecha configurada</li>
           </ul>
