@@ -89,10 +89,53 @@ const turnosSlice = createSlice({
         };
         localStorage.setItem('turnos-app-data', JSON.stringify(datosAGuardar));
       }
+    },
+    exportarConfiguracion: (state) => {
+      // Exportar configuración actual
+      const configuracion = {
+        fechaInicioCarmen: state.fechaInicioCarmen,
+        trabajadores: state.trabajadores,
+        fechaExportacion: new Date().toISOString(),
+        version: '1.0'
+      };
+      return configuracion;
+    },
+    importarConfiguracion: (state, action) => {
+      const { fechaInicioCarmen, trabajadores } = action.payload;
+      if (fechaInicioCarmen) state.fechaInicioCarmen = fechaInicioCarmen;
+      if (trabajadores) state.trabajadores = trabajadores;
+      
+      // Recalcular turno actual
+      state.personaTrabajando = calcularPersonaTrabajando(state.fechaSeleccionada, state.fechaInicioCarmen);
+      
+      // Guardar en localStorage
+      const datosAGuardar = {
+        fechaInicioCarmen: state.fechaInicioCarmen,
+        trabajadores: state.trabajadores
+      };
+      localStorage.setItem('turnos-app-data', JSON.stringify(datosAGuardar));
+    },
+    restablecerConfiguracion: (state) => {
+      // Restablecer a valores por defecto
+      state.fechaInicioCarmen = '2025-09-09';
+      state.trabajadores = [
+        { id: 1, nombre: 'Carmen Hernández', color: '#0ea5e9' },
+        { id: 2, nombre: 'Azucena Hernández', color: '#d946ef' }
+      ];
+      
+      // Recalcular turno actual
+      state.personaTrabajando = calcularPersonaTrabajando(state.fechaSeleccionada, state.fechaInicioCarmen);
+      
+      // Guardar en localStorage
+      const datosAGuardar = {
+        fechaInicioCarmen: state.fechaInicioCarmen,
+        trabajadores: state.trabajadores
+      };
+      localStorage.setItem('turnos-app-data', JSON.stringify(datosAGuardar));
     }
   },
 });
 
-export const { seleccionarFecha, actualizarFechaInicio, actualizarTrabajador, recalcularTurnos } = turnosSlice.actions;
+export const { seleccionarFecha, actualizarFechaInicio, actualizarTrabajador, recalcularTurnos, exportarConfiguracion, importarConfiguracion, restablecerConfiguracion } = turnosSlice.actions;
 export { calcularPersonaTrabajando };
 export default turnosSlice.reducer;
