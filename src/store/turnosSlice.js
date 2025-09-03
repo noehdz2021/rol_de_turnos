@@ -1,7 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 
 // Función para calcular qué persona trabaja en una fecha específica
-const calcularPersonaTrabajando = (fecha, fechaInicioCarmen = '2025-09-09') => {
+const calcularPersonaTrabajando = (fecha, fechaInicioCarmen = '2025-09-08') => {
   const fechaInicio = new Date(fechaInicioCarmen + 'T00:00:00');
   const fechaConsulta = new Date(fecha + 'T00:00:00');
   
@@ -36,7 +36,7 @@ const cargarTurnosDesdeStorage = () => {
   }
   
   return {
-    fechaInicioCarmen: '2025-09-09',
+    fechaInicioCarmen: '2025-09-08',
     trabajadores: [
       { id: 1, nombre: 'Carmen Hernández', color: '#0ea5e9' },
       { id: 2, nombre: 'Azucena Hernández', color: '#d946ef' }
