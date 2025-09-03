@@ -29,7 +29,22 @@ const cargarTurnosDesdeStorage = () => {
   try {
     const turnosGuardados = localStorage.getItem('turnos-app-data');
     if (turnosGuardados) {
-      return JSON.parse(turnosGuardados);
+      const datos = JSON.parse(turnosGuardados);
+      
+      // Verificar si tiene datos viejos (año 2024) y actualizarlos
+      if (datos.fechaInicioCarmen && datos.fechaInicioCarmen.includes('2024')) {
+        console.log('Detectados datos viejos, actualizando a 2025...');
+        localStorage.removeItem('turnos-app-data');
+        return {
+          fechaInicioCarmen: '2025-09-08',
+          trabajadores: datos.trabajadores || [
+            { id: 1, nombre: 'Carmen Hernández', color: '#0ea5e9' },
+            { id: 2, nombre: 'Azucena Hernández', color: '#d946ef' }
+          ]
+        };
+      }
+      
+      return datos;
     }
   } catch (error) {
     console.error('Error al cargar datos desde localStorage:', error);
@@ -89,10 +104,29 @@ const turnosSlice = createSlice({
         };
         localStorage.setItem('turnos-app-data', JSON.stringify(datosAGuardar));
       }
+    },
+    limpiarDatosViejos: (state) => {
+      // Forzar nueva configuración por defecto
+      state.fechaInicioCarmen = '2025-09-08';
+      state.trabajadores = [
+        { id: 1, nombre: 'Carmen Hernández', color: '#0ea5e9' },
+        { id: 2, nombre: 'Azucena Hernández', color: '#d946ef' }
+      ];
+      
+      // Recalcular turno actual
+      state.personaTrabajando = calcularPersonaTrabajando(state.fechaSeleccionada, state.fechaInicioCarmen);
+      
+      // Limpiar localStorage y guardar nueva configuración
+      localStorage.removeItem('turnos-app-data');
+      const datosAGuardar = {
+        fechaInicioCarmen: state.fechaInicioCarmen,
+        trabajadores: state.trabajadores
+      };
+      localStorage.setItem('turnos-app-data', JSON.stringify(datosAGuardar));
     }
   },
 });
 
-export const { seleccionarFecha, actualizarFechaInicio, actualizarTrabajador, recalcularTurnos } = turnosSlice.actions;
+export const { seleccionarFecha, actualizarFechaInicio, actualizarTrabajador, recalcularTurnos, limpiarDatosViejos } = turnosSlice.actions;
 export { calcularPersonaTrabajando };
 export default turnosSlice.reducer;
