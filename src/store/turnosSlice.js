@@ -1,7 +1,12 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { configuracionAPI, usuariosAPI } from '../services/api';
 
 // Función para calcular qué persona trabaja en una fecha específica
-const calcularPersonaTrabajando = (fecha, fechaInicioCarmen = '2025-09-08') => {
+export const calcularPersonaTrabajando = (fecha, fechaInicioCarmen, trabajadores) => {
+  if (!fechaInicioCarmen || !trabajadores || trabajadores.length === 0) {
+    return null;
+  }
+
   const fechaInicio = new Date(fechaInicioCarmen + 'T00:00:00');
   const fechaConsulta = new Date(fecha + 'T00:00:00');
   
@@ -15,58 +20,46 @@ const calcularPersonaTrabajando = (fecha, fechaInicioCarmen = '2025-09-08') => {
   }
   
   // Cada día alterna la persona (sistema 12×36)
-  // Carmen empieza, entonces:
-  // Día 0: Carmen
-  // Día 1: Azucena  
-  // Día 2: Carmen
-  // Día 3: Azucena
-  // etc.
-  return diferenciaDias % 2 === 0 ? 'Carmen Hernández' : 'Azucena Hernández';
+  // El primer trabajador (orden 1) inicia, luego el segundo (orden 2), y así sucesivamente
+  const trabajadoresOrdenados = [...trabajadores].sort((a, b) => a.orden - b.orden);
+  const indice = diferenciaDias % trabajadoresOrdenados.length;
+  
+  return trabajadoresOrdenados[indice]?.nombre || null;
 };
 
-// Cargar datos desde localStorage
-const cargarTurnosDesdeStorage = () => {
-  try {
-    const turnosGuardados = localStorage.getItem('turnos-app-data');
-    if (turnosGuardados) {
-      const datos = JSON.parse(turnosGuardados);
-      
-      // Verificar si tiene datos viejos (año 2024) y actualizarlos
-      if (datos.fechaInicioCarmen && datos.fechaInicioCarmen.includes('2024')) {
-        console.log('Detectados datos viejos, actualizando a 2025...');
-        localStorage.removeItem('turnos-app-data');
-        return {
-          fechaInicioCarmen: '2025-09-08',
-          trabajadores: datos.trabajadores || [
-            { id: 1, nombre: 'Carmen Hernández', color: '#0ea5e9' },
-            { id: 2, nombre: 'Azucena Hernández', color: '#d946ef' }
-          ]
-        };
-      }
-      
-      return datos;
-    }
-  } catch (error) {
-    console.error('Error al cargar datos desde localStorage:', error);
+// Async thunks para cargar datos desde la API
+export const cargarConfiguracion = createAsyncThunk(
+  'turnos/cargarConfiguracion',
+  async () => {
+    const data = await configuracionAPI.get();
+    return data;
   }
-  
-  return {
-    fechaInicioCarmen: '2025-09-08',
-    trabajadores: [
-      { id: 1, nombre: 'Carmen Hernández', color: '#0ea5e9' },
-      { id: 2, nombre: 'Azucena Hernández', color: '#d946ef' }
-    ]
-  };
-};
+);
+
+export const actualizarFechaInicioAPI = createAsyncThunk(
+  'turnos/actualizarFechaInicioAPI',
+  async (fechaInicio) => {
+    const data = await configuracionAPI.updateFechaInicio(fechaInicio);
+    return data;
+  }
+);
+
+export const actualizarUsuarioAPI = createAsyncThunk(
+  'turnos/actualizarUsuarioAPI',
+  async ({ id, datos }) => {
+    const data = await usuariosAPI.update(id, datos);
+    return { id, datos: data };
+  }
+);
 
 const initialState = {
-  ...cargarTurnosDesdeStorage(),
+  fechaInicioCarmen: null,
+  trabajadores: [],
   fechaSeleccionada: new Date().toISOString().split('T')[0],
   personaTrabajando: null,
+  loading: false,
+  error: null,
 };
-
-// Calcular persona trabajando para la fecha inicial
-initialState.personaTrabajando = calcularPersonaTrabajando(initialState.fechaSeleccionada, initialState.fechaInicioCarmen);
 
 const turnosSlice = createSlice({
   name: 'turnos',
@@ -74,59 +67,87 @@ const turnosSlice = createSlice({
   reducers: {
     seleccionarFecha: (state, action) => {
       state.fechaSeleccionada = action.payload;
-      state.personaTrabajando = calcularPersonaTrabajando(action.payload, state.fechaInicioCarmen);
-    },
-    actualizarFechaInicio: (state, action) => {
-      state.fechaInicioCarmen = action.payload;
-      state.personaTrabajando = calcularPersonaTrabajando(state.fechaSeleccionada, state.fechaInicioCarmen);
-      
-      // Guardar en localStorage
-      const datosAGuardar = {
-        fechaInicioCarmen: state.fechaInicioCarmen,
-        trabajadores: state.trabajadores
-      };
-      localStorage.setItem('turnos-app-data', JSON.stringify(datosAGuardar));
+      state.personaTrabajando = calcularPersonaTrabajando(
+        action.payload, 
+        state.fechaInicioCarmen, 
+        state.trabajadores
+      );
     },
     recalcularTurnos: (state) => {
       // Forzar recálculo del turno actual
-      state.personaTrabajando = calcularPersonaTrabajando(state.fechaSeleccionada, state.fechaInicioCarmen);
+      state.personaTrabajando = calcularPersonaTrabajando(
+        state.fechaSeleccionada, 
+        state.fechaInicioCarmen, 
+        state.trabajadores
+      );
     },
-    actualizarTrabajador: (state, action) => {
-      const { id, datos } = action.payload;
-      const index = state.trabajadores.findIndex(t => t.id === id);
-      if (index !== -1) {
-        state.trabajadores[index] = { ...state.trabajadores[index], ...datos };
-        
-        // Guardar en localStorage
-        const datosAGuardar = {
-          fechaInicioCarmen: state.fechaInicioCarmen,
-          trabajadores: state.trabajadores
-        };
-        localStorage.setItem('turnos-app-data', JSON.stringify(datosAGuardar));
-      }
-    },
-    limpiarDatosViejos: (state) => {
-      // Forzar nueva configuración por defecto
-      state.fechaInicioCarmen = '2025-09-08';
-      state.trabajadores = [
-        { id: 1, nombre: 'Carmen Hernández', color: '#0ea5e9' },
-        { id: 2, nombre: 'Azucena Hernández', color: '#d946ef' }
-      ];
-      
-      // Recalcular turno actual
-      state.personaTrabajando = calcularPersonaTrabajando(state.fechaSeleccionada, state.fechaInicioCarmen);
-      
-      // Limpiar localStorage y guardar nueva configuración
-      localStorage.removeItem('turnos-app-data');
-      const datosAGuardar = {
-        fechaInicioCarmen: state.fechaInicioCarmen,
-        trabajadores: state.trabajadores
-      };
-      localStorage.setItem('turnos-app-data', JSON.stringify(datosAGuardar));
-    }
+  },
+  extraReducers: (builder) => {
+    // Cargar configuración
+    builder
+      .addCase(cargarConfiguracion.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(cargarConfiguracion.fulfilled, (state, action) => {
+        state.loading = false;
+        state.fechaInicioCarmen = action.payload.fechaInicio;
+        state.trabajadores = action.payload.usuarios;
+        state.personaTrabajando = calcularPersonaTrabajando(
+          state.fechaSeleccionada,
+          state.fechaInicioCarmen,
+          state.trabajadores
+        );
+      })
+      .addCase(cargarConfiguracion.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message;
+      });
+
+    // Actualizar fecha de inicio
+    builder
+      .addCase(actualizarFechaInicioAPI.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(actualizarFechaInicioAPI.fulfilled, (state, action) => {
+        state.loading = false;
+        state.fechaInicioCarmen = action.payload.fechaInicio;
+        state.personaTrabajando = calcularPersonaTrabajando(
+          state.fechaSeleccionada,
+          state.fechaInicioCarmen,
+          state.trabajadores
+        );
+      })
+      .addCase(actualizarFechaInicioAPI.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message;
+      });
+
+    // Actualizar usuario
+    builder
+      .addCase(actualizarUsuarioAPI.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(actualizarUsuarioAPI.fulfilled, (state, action) => {
+        state.loading = false;
+        const index = state.trabajadores.findIndex(t => t.id === action.payload.id);
+        if (index !== -1) {
+          state.trabajadores[index] = { ...state.trabajadores[index], ...action.payload.datos };
+        }
+        state.personaTrabajando = calcularPersonaTrabajando(
+          state.fechaSeleccionada,
+          state.fechaInicioCarmen,
+          state.trabajadores
+        );
+      })
+      .addCase(actualizarUsuarioAPI.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message;
+      });
   },
 });
 
-export const { seleccionarFecha, actualizarFechaInicio, actualizarTrabajador, recalcularTurnos, limpiarDatosViejos } = turnosSlice.actions;
-export { calcularPersonaTrabajando };
+export const { seleccionarFecha, recalcularTurnos } = turnosSlice.actions;
 export default turnosSlice.reducer;

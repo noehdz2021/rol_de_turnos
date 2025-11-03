@@ -4,7 +4,7 @@ import react from '@vitejs/plugin-react'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
-  base: '/rol_de_turnos/', // Para GitHub Pages
+  base: '/',
   build: {
     outDir: 'dist',
     assetsDir: 'assets',
@@ -25,7 +25,13 @@ export default defineConfig({
   },
   server: {
     port: 5173,
-    host: true // Permitir acceso desde red local
+    host: true, // Permitir acceso desde red local
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
+      }
+    }
   },
   preview: {
     port: 4173,

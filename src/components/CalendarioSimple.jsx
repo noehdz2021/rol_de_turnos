@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { Calendar, User, Clock, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Calendar, User, Clock, ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react';
 import { seleccionarFecha, calcularPersonaTrabajando, recalcularTurnos } from '../store/turnosSlice';
 
 const CalendarioSimple = () => {
@@ -9,6 +9,7 @@ const CalendarioSimple = () => {
   
   const [mesActual, setMesActual] = useState(new Date());
   const [diasDelMes, setDiasDelMes] = useState([]);
+  const [usuarioSeleccionado, setUsuarioSeleccionado] = useState(null); // null = mostrar todos
 
   // Recalcular turnos cuando cambie la fecha de inicio
   useEffect(() => {
@@ -101,6 +102,73 @@ const CalendarioSimple = () => {
             <Calendar style={{ color: '#0ea5e9' }} size={32} />
             Calendario de Turnos
           </h1>
+        </div>
+
+        {/* Selector de usuario */}
+        <div style={{ 
+          marginBottom: '1.5rem',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '1rem',
+          flexWrap: 'wrap'
+        }}>
+          <label style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '0.5rem',
+            fontWeight: '500',
+            color: '#374151',
+            fontSize: '0.875rem'
+          }}>
+            <User size={18} style={{ color: '#0ea5e9' }} />
+            Filtrar por usuario:
+          </label>
+          <div style={{ position: 'relative', minWidth: '200px' }}>
+            <select
+              value={usuarioSeleccionado || ''}
+              onChange={(e) => setUsuarioSeleccionado(e.target.value || null)}
+              style={{
+                width: '100%',
+                padding: '0.625rem 2.5rem 0.625rem 0.875rem',
+                border: '1px solid #d1d5db',
+                borderRadius: '8px',
+                backgroundColor: 'white',
+                fontSize: '0.875rem',
+                color: '#1f2937',
+                cursor: 'pointer',
+                appearance: 'none',
+                backgroundImage: 'none',
+                boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+                transition: 'all 0.2s'
+              }}
+              onFocus={(e) => {
+                e.target.style.borderColor = '#0ea5e9';
+                e.target.style.boxShadow = '0 0 0 3px rgba(14, 165, 233, 0.1)';
+              }}
+              onBlur={(e) => {
+                e.target.style.borderColor = '#d1d5db';
+                e.target.style.boxShadow = '0 1px 2px 0 rgba(0, 0, 0, 0.05)';
+              }}
+            >
+              <option value="">Todos los usuarios</option>
+              {trabajadores.map(trabajador => (
+                <option key={trabajador.id} value={trabajador.nombre}>
+                  {trabajador.nombre}
+                </option>
+              ))}
+            </select>
+            <ChevronDown 
+              size={18} 
+              style={{ 
+                position: 'absolute',
+                right: '0.75rem',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                pointerEvents: 'none',
+                color: '#6b7280'
+              }} 
+            />
+          </div>
         </div>
 
         {/* Información del día seleccionado */}
@@ -271,8 +339,13 @@ const CalendarioSimple = () => {
           {diasDelMes.map((diaInfo, index) => {
             const { fecha, esDelMesActual, numero } = diaInfo;
             const fechaString = fecha.toISOString().split('T')[0];
-            const personaDelDia = calcularPersonaTrabajando(fechaString, fechaInicioCarmen);
+            const personaDelDia = calcularPersonaTrabajando(fechaString, fechaInicioCarmen, trabajadores);
             const colorTrabajador = personaDelDia ? obtenerColorTrabajador(personaDelDia) : null;
+            
+            // Si hay un usuario seleccionado, solo resaltar si coincide
+            const debeResaltar = usuarioSeleccionado 
+              ? personaDelDia === usuarioSeleccionado 
+              : personaDelDia !== null; // Si no hay selección, mostrar todos
             
             let clasesDia = 'calendar-day';
             if (esFechaSeleccionada(fecha)) clasesDia += ' selected';
@@ -287,13 +360,19 @@ const CalendarioSimple = () => {
                   opacity: esDelMesActual ? 1 : 0.5,
                   backgroundColor: esFechaSeleccionada(fecha) 
                     ? '#dbeafe' 
-                    : colorTrabajador 
-                      ? `${colorTrabajador}20` 
+                    : debeResaltar && colorTrabajador
+                      ? `${colorTrabajador}40` // Más visible cuando está resaltado
                       : 'white'
                 }}
               >
-                <span style={{ fontSize: '1.125rem', fontWeight: '500' }}>{numero}</span>
-                {personaDelDia && esDelMesActual && (
+                <span style={{ 
+                  fontSize: '1.125rem', 
+                  fontWeight: debeResaltar && esDelMesActual ? '600' : '500',
+                  color: debeResaltar && esDelMesActual && colorTrabajador ? colorTrabajador : undefined
+                }}>
+                  {numero}
+                </span>
+                {debeResaltar && personaDelDia && esDelMesActual && (
                   <div 
                     style={{
                       width: '8px',
@@ -310,6 +389,21 @@ const CalendarioSimple = () => {
         </div>
 
         {/* Leyenda */}
+        {usuarioSeleccionado && (
+          <div style={{ 
+            marginTop: '1.5rem', 
+            padding: '1rem',
+            backgroundColor: '#f0f9ff',
+            borderRadius: '8px',
+            textAlign: 'center'
+          }}>
+            <p style={{ fontSize: '0.875rem', color: '#6b7280', margin: 0 }}>
+              Mostrando turnos de: <strong style={{ color: obtenerColorTrabajador(usuarioSeleccionado) }}>
+                {usuarioSeleccionado}
+              </strong>
+            </p>
+          </div>
+        )}
         <div style={{ 
           marginTop: '1.5rem', 
           display: 'flex', 
@@ -317,7 +411,7 @@ const CalendarioSimple = () => {
           gap: '1rem', 
           justifyContent: 'center' 
         }}>
-          {trabajadores.map(trabajador => (
+          {!usuarioSeleccionado && trabajadores.map(trabajador => (
             <div key={trabajador.id} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <div 
                 style={{
@@ -332,6 +426,21 @@ const CalendarioSimple = () => {
               </span>
             </div>
           ))}
+          {usuarioSeleccionado && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <div 
+                style={{
+                  width: '16px',
+                  height: '16px',
+                  borderRadius: '50%',
+                  backgroundColor: obtenerColorTrabajador(usuarioSeleccionado)
+                }}
+              />
+              <span style={{ fontSize: '0.875rem', fontWeight: '600', color: '#374151' }}>
+                {usuarioSeleccionado}
+              </span>
+            </div>
+          )}
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <div style={{
               width: '16px',

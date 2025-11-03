@@ -1,178 +1,257 @@
 # 🏥 TurnosApp - Sistema de Turnos 12×36
 
-Aplicación web para gestionar turnos de trabajo entre **Azucena Hernández** y **Carmen Hernández** con sistema de rotación 12×36 (12 horas de trabajo, 36 horas de descanso).
+Aplicación web para gestionar turnos de trabajo con sistema de rotación 12×36 (12 horas de trabajo, 36 horas de descanso) usando PostgreSQL en Railway.
 
-![React](https://img.shields.io/badge/React-18-blue.svg)
+![React](https://img.shields.io/badge/React-19-blue.svg)
 ![Vite](https://img.shields.io/badge/Vite-7.1.4-purple.svg)
 ![Redux](https://img.shields.io/badge/Redux%20Toolkit-2.9.0-green.svg)
-![Mobile](https://img.shields.io/badge/Mobile-Optimized-orange.svg)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-blue.svg)
+![Railway](https://img.shields.io/badge/Railway-Ready-orange.svg)
 
-## 🚀 Demo en Vivo
-
-```bash
-git clone https://github.com/tu-usuario/turnos-app.git
-cd turnos-app
-npm install
-npm run dev
-```
-
-Luego abre `http://localhost:5173/` en tu navegador.
-
-## 📱 Características
+## 🚀 Características
 
 - ✅ **Calendario Visual Interactivo** - Interfaz intuitiva para ver los turnos de cada día
+- ✅ **Filtro de Usuarios** - Selecciona un usuario para ver solo sus turnos resaltados
 - ✅ **Cálculo Automático** - Sistema que calcula automáticamente quién trabaja cada día
 - ✅ **Configuración Flexible** - Cambiar nombres, colores y fecha de inicio
 - ✅ **Estadísticas Visuales** - Gráficos y análisis de distribución de turnos
-- ✅ **Almacenamiento Persistente** - Los datos se guardan automáticamente en LocalStorage
+- ✅ **Base de Datos PostgreSQL** - Almacenamiento persistente en Railway
+- ✅ **API RESTful** - Backend con Express y Node.js
 - ✅ **Diseño Responsive** - Optimizado para desktop, tablet y móvil
-- ✅ **Compatible Safari/iOS** - Funciona perfectamente en dispositivos Apple
-- ✅ **Navegación Rápida** - Botón "Hoy" para ir directamente a la fecha actual
 
 ## 🛠️ Tecnologías Utilizadas
 
 | Tecnología | Versión | Propósito |
 |------------|---------|-----------|
-| **React** | 18.x | Framework principal |
+| **React** | 19.x | Framework principal (Frontend) |
 | **Vite** | 7.x | Build tool y dev server |
 | **Redux Toolkit** | 2.x | Manejo de estado global |
-| **React Router** | v6 | Navegación entre páginas |
+| **Express** | 4.x | Servidor backend |
+| **PostgreSQL** | 15+ | Base de datos |
+| **Node.js** | 18+ | Runtime del servidor |
+| **React Router** | v7 | Navegación entre páginas |
 | **React Hook Form** | 7.x | Manejo de formularios |
 | **Lucide React** | Latest | Iconos modernos |
 | **Recharts** | 3.x | Gráficos y visualizaciones |
-| **CSS Vanilla** | - | Estilos responsive |
+
+## 📋 Requisitos Previos
+
+- Node.js 18 o superior
+- npm o yarn
+- PostgreSQL (para desarrollo local) o cuenta en Railway (para producción)
+
+## 🚀 Instalación Local
+
+### 1. Clonar el repositorio
+
+```bash
+git clone https://github.com/tu-usuario/turnos-app.git
+cd turnos-app
+```
+
+### 2. Instalar dependencias
+
+```bash
+npm install
+```
+
+### 3. Configurar variables de entorno
+
+Crea un archivo `.env` en la raíz del proyecto:
+
+```env
+DATABASE_URL=postgresql://usuario:contraseña@localhost:5432/turnos_app
+PORT=3001
+NODE_ENV=development
+```
+
+### 4. Configurar PostgreSQL local (opcional)
+
+Si quieres probar localmente, necesitas PostgreSQL:
+
+```bash
+# Crear base de datos
+createdb turnos_app
+
+# O usando psql
+psql -U postgres
+CREATE DATABASE turnos_app;
+```
+
+### 5. Ejecutar la aplicación
+
+**Opción A: Ejecutar todo junto (recomendado)**
+```bash
+npm run dev:all
+```
+
+**Opción B: Ejecutar por separado**
+
+Terminal 1 - Backend:
+```bash
+npm run dev:server
+```
+
+Terminal 2 - Frontend:
+```bash
+npm run dev
+```
+
+### 6. Acceder a la aplicación
+
+- Frontend: http://localhost:5173
+- Backend API: http://localhost:3001/api
+
+## 🚂 Despliegue en Railway
+
+### Paso 1: Preparar el proyecto
+
+```bash
+git add .
+git commit -m "Preparar para Railway"
+git push
+```
+
+### Paso 2: Crear proyecto en Railway
+
+1. Ve a [Railway Dashboard](https://railway.app/dashboard)
+2. Haz clic en "New Project"
+3. Selecciona "Deploy from GitHub repo"
+4. Conecta tu repositorio
+
+### Paso 3: Agregar PostgreSQL
+
+1. En tu proyecto, haz clic en "New"
+2. Selecciona "Database" → "Add PostgreSQL"
+3. Railway creará automáticamente la base de datos
+
+### Paso 4: Configurar Variables de Entorno
+
+En tu servicio de Railway, ve a "Variables" y agrega:
+
+```
+NODE_ENV=production
+PORT=${{PORT}}
+DATABASE_URL=${{Postgres.DATABASE_URL}}
+```
+
+### Paso 5: Desplegar
+
+Railway detectará automáticamente el proyecto y comenzará a desplegar. Una vez completado, obtendrás una URL pública.
+
+📖 **Guía completa de despliegue**: Ver [DEPLOYMENT.md](./DEPLOYMENT.md)
 
 ## 📅 Sistema de Turnos
 
 ### Lógica del Sistema 12×36:
-- **Carmen Hernández** inicia los turnos (fecha configurable)
-- **Alternancia diaria automática**: Carmen → Azucena → Carmen → Azucena...
+- El primer trabajador (orden 1) inicia los turnos según la fecha configurada
+- **Alternancia automática**: Trabajador 1 → Trabajador 2 → Trabajador 1 → Trabajador 2...
 - **12 horas** de trabajo seguidas de **36 horas** de descanso
 - **Cálculo preciso** para cualquier fecha pasada o futura
 
 ### Ejemplo de Rotación:
 ```
-Lunes 8 Sep    → Carmen Hernández
-Martes 9 Sep   → Azucena Hernández  
-Miércoles 10   → Carmen Hernández
-Jueves 11      → Azucena Hernández
+Lunes 8 Sep    → Carmen Hernández (orden 1)
+Martes 9 Sep   → Azucena Hernández (orden 2)
+Miércoles 10   → Carmen Hernández (orden 1)
+Jueves 11      → Azucena Hernández (orden 2)
 ...
-```
-
-## 🚀 Instalación y Uso
-
-### Prerrequisitos
-- Node.js 18+ 
-- npm o yarn
-
-### Instalación Local
-```bash
-# Clonar el repositorio
-git clone https://github.com/tu-usuario/turnos-app.git
-
-# Navegar al directorio
-cd turnos-app
-
-# Instalar dependencias
-npm install
-
-# Ejecutar en desarrollo
-npm run dev
-
-# Construir para producción
-npm run build
-
-# Vista previa de producción
-npm run preview
-```
-
-### 📱 Acceso desde Móvil
-
-Para acceder desde tu celular en la misma red WiFi:
-```bash
-# Ejecutar con acceso de red
-npm run dev -- --host
-
-# Luego accede desde tu móvil a:
-# http://[TU-IP-LOCAL]:5173/
-# Ejemplo: http://192.168.100.106:5173/
-```
-
-## 📱 Navegación de la App
-
-### 🏠 **Página Principal - Calendario**
-- Calendario mensual interactivo
-- Selección de fechas con un clic
-- Indicadores visuales por trabajadora
-- Botón "Hoy" para navegación rápida
-- Información del día seleccionado
-
-### 📊 **Estadísticas**
-- Gráfico de barras: turnos por semana
-- Gráfico circular: distribución mensual  
-- Tarjetas de resumen con totales
-- Análisis de próximos 30 días
-
-### ⚙️ **Configuración**
-- Personalizar nombres de trabajadoras
-- Cambiar colores identificativos
-- Modificar fecha de inicio del sistema
-- Validación de formularios
-- Guardado automático
-
-## 🎨 Optimizaciones Móviles
-
-### Safari/iOS:
-- ✅ Meta tags específicos para PWA
-- ✅ Prevención de zoom en inputs
-- ✅ Área táctil mínima de 44px
-- ✅ Sin highlights de selección
-- ✅ Compatibilidad con notch (iPhone X+)
-
-### Responsive Design:
-- ✅ Breakpoints: 480px, 768px, 1200px
-- ✅ Grid flexible con `auto-fit`
-- ✅ Textos escalables con `clamp()`
-- ✅ Navegación adaptativa
-- ✅ Gráficos responsivos
-
-## 🔧 Scripts Disponibles
-
-```bash
-npm run dev          # Servidor de desarrollo
-npm run dev -- --host # Servidor accesible desde red local
-npm run build        # Construir para producción
-npm run preview      # Vista previa de build
-npm run lint         # Verificar código con ESLint
 ```
 
 ## 📁 Estructura del Proyecto
 
 ```
 turnos-app/
+├── server/
+│   ├── index.js              # Servidor Express principal
+│   ├── database/
+│   │   └── init.js           # Inicialización de BD
+│   └── routes/
+│       ├── usuarios.js       # Rutas de usuarios
+│       └── configuracion.js  # Rutas de configuración
 ├── src/
 │   ├── components/
-│   │   ├── CalendarioSimple.jsx    # Calendario principal
-│   │   ├── ConfiguracionSimple.jsx # Configuración
-│   │   ├── EstadisticasSimples.jsx # Gráficos y análisis
-│   │   └── NavbarSimple.jsx        # Navegación
+│   │   ├── CalendarioSimple.jsx
+│   │   ├── ConfiguracionSimple.jsx
+│   │   ├── EstadisticasSimples.jsx
+│   │   └── NavbarSimple.jsx
+│   ├── services/
+│   │   └── api.js            # Servicio de API
 │   ├── store/
-│   │   ├── index.js                # Configuración Redux
-│   │   └── turnosSlice.js          # Lógica de turnos
-│   ├── index.css                   # Estilos responsive
-│   ├── main.jsx                    # Punto de entrada
-│   └── App.jsx                     # Componente principal
-├── public/                         # Archivos estáticos
-├── package.json                    # Dependencias
-└── README.md                       # Documentación
+│   │   ├── index.js
+│   │   └── turnosSlice.js
+│   ├── App.jsx
+│   └── main.jsx
+├── package.json
+├── railway.json              # Configuración de Railway
+└── DEPLOYMENT.md             # Guía de despliegue
 ```
 
-## 🎯 Casos de Uso
+## 🔌 API Endpoints
 
-- **Hospitales y Clínicas** - Gestión de turnos médicos
-- **Empresas de servicios** - Turnos de seguridad, atención al cliente
-- **Servicios de Emergencia** - Rotación de personal
-- **Cualquier trabajo** con sistema 12×36
+### Configuración
+- `GET /api/configuracion` - Obtener configuración completa (config + usuarios)
+- `PUT /api/configuracion` - Actualizar fecha de inicio
+
+### Usuarios
+- `GET /api/usuarios` - Obtener todos los usuarios
+- `GET /api/usuarios/:id` - Obtener un usuario por ID
+- `PUT /api/usuarios/:id` - Actualizar un usuario
+- `POST /api/usuarios` - Crear un nuevo usuario
+
+### Health Check
+- `GET /api/health` - Verificar estado del servidor
+
+## 📱 Características Móviles
+
+- ✅ Meta tags específicos para PWA
+- ✅ Prevención de zoom en inputs
+- ✅ Área táctil mínima de 44px
+- ✅ Compatibilidad con notch (iPhone X+)
+- ✅ Diseño responsive completo
+
+## 🗄️ Esquema de Base de Datos
+
+### Tabla: `usuarios`
+- `id` (SERIAL PRIMARY KEY)
+- `nombre` (VARCHAR)
+- `color` (VARCHAR) - Color hexadecimal
+- `orden` (INTEGER) - Orden de turno
+- `created_at` (TIMESTAMP)
+- `updated_at` (TIMESTAMP)
+
+### Tabla: `configuracion`
+- `id` (SERIAL PRIMARY KEY)
+- `fecha_inicio` (DATE) - Fecha de inicio del sistema
+- `usuario_inicial_id` (INTEGER) - ID del usuario que inicia
+- `created_at` (TIMESTAMP)
+- `updated_at` (TIMESTAMP)
+
+## 🔧 Scripts Disponibles
+
+```bash
+npm run dev          # Servidor de desarrollo (solo frontend)
+npm run dev:server   # Servidor backend
+npm run dev:all      # Ambos servidores (recomendado)
+npm run build        # Construir para producción
+npm start            # Iniciar servidor en producción
+npm run lint         # Verificar código con ESLint
+```
+
+## 🎯 Mejoras Implementadas
+
+### Desde LocalStorage a PostgreSQL:
+- ✅ Migración completa a base de datos PostgreSQL
+- ✅ API RESTful para todas las operaciones
+- ✅ Sincronización automática entre frontend y backend
+- ✅ Inicialización automática de datos por defecto
+- ✅ Manejo de errores mejorado
+
+### Nuevas Funcionalidades:
+- ✅ Filtro de usuarios en el calendario
+- ✅ Resaltado visual de turnos por usuario
+- ✅ Carga automática de datos al iniciar
+- ✅ Estados de carga y error
 
 ## 🤝 Contribuciones
 
@@ -188,7 +267,7 @@ Este proyecto está bajo la Licencia MIT. Ver `LICENSE` para más detalles.
 
 ## 👥 Autores
 
-- **Desarrollador** - Aplicación creada para gestionar turnos de Azucena y Carmen Hernández
+- **Desarrollador** - Aplicación creada para gestionar turnos de trabajo con sistema 12×36
 
 ---
 

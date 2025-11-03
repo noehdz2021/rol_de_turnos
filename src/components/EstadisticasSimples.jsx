@@ -9,21 +9,21 @@ const EstadisticasSimples = () => {
   // Calcular estadísticas para los próximos 30 días
   const calcularEstadisticas = () => {
     const hoy = new Date();
-    const stats = {
-      Carmen: 0,
-      Azucena: 0
-    };
+    const stats = {};
+
+    // Inicializar stats con todos los trabajadores
+    trabajadores.forEach(trabajador => {
+      stats[trabajador.nombre] = 0;
+    });
 
     for (let i = 0; i < 30; i++) {
       const fecha = new Date(hoy);
       fecha.setDate(fecha.getDate() + i);
       const fechaString = fecha.toISOString().split('T')[0];
-      const persona = calcularPersonaTrabajando(fechaString, fechaInicioCarmen);
+      const persona = calcularPersonaTrabajando(fechaString, fechaInicioCarmen, trabajadores);
       
-      if (persona === 'Carmen Hernández') {
-        stats.Carmen++;
-      } else if (persona === 'Azucena Hernández') {
-        stats.Azucena++;
+      if (persona && stats.hasOwnProperty(persona)) {
+        stats[persona]++;
       }
     }
 
@@ -39,25 +39,25 @@ const EstadisticasSimples = () => {
       const inicioSemana = new Date(hoy);
       inicioSemana.setDate(hoy.getDate() + (semana * 7));
       
-      const stats = { Carmen: 0, Azucena: 0 };
+      const stats = {};
+      trabajadores.forEach(trabajador => {
+        stats[trabajador.nombre] = 0;
+      });
       
       for (let dia = 0; dia < 7; dia++) {
         const fecha = new Date(inicioSemana);
         fecha.setDate(inicioSemana.getDate() + dia);
         const fechaString = fecha.toISOString().split('T')[0];
-        const persona = calcularPersonaTrabajando(fechaString, fechaInicioCarmen);
+        const persona = calcularPersonaTrabajando(fechaString, fechaInicioCarmen, trabajadores);
         
-        if (persona === 'Carmen Hernández') {
-          stats.Carmen++;
-        } else if (persona === 'Azucena Hernández') {
-          stats.Azucena++;
+        if (persona && stats.hasOwnProperty(persona)) {
+          stats[persona]++;
         }
       }
 
       semanas.push({
         semana: `S${semana + 1}`,
-        Carmen: stats.Carmen,
-        Azucena: stats.Azucena
+        ...stats
       });
     }
 
@@ -67,10 +67,15 @@ const EstadisticasSimples = () => {
   const estadisticas30Dias = calcularEstadisticas();
   const turnosPorSemana = calcularTurnosPorSemana();
 
-  const dataPieChart = [
-    { name: 'Carmen', value: estadisticas30Dias.Carmen, color: trabajadores[0]?.color || '#0ea5e9' },
-    { name: 'Azucena', value: estadisticas30Dias.Azucena, color: trabajadores[1]?.color || '#d946ef' }
-  ];
+  const dataPieChart = trabajadores.map(trabajador => ({
+    name: trabajador.nombre,
+    value: estadisticas30Dias[trabajador.nombre] || 0,
+    color: trabajador.color
+  }));
+
+  // Obtener el primer trabajador para mostrar en tarjeta
+  const primerTrabajador = trabajadores[0];
+  const segundoTrabajador = trabajadores[1];
 
   return (
     <div className="container">
@@ -99,21 +104,15 @@ const EstadisticasSimples = () => {
         gap: '1rem', 
         marginBottom: '1.5rem' 
       }}>
-        <div className="card" style={{ textAlign: 'center', padding: '1rem' }}>
-          <div style={{ fontSize: 'clamp(1.5rem, 5vw, 2rem)', fontWeight: 'bold', color: '#0ea5e9', marginBottom: '0.5rem' }}>
-            {estadisticas30Dias.Carmen}
+        {trabajadores.map((trabajador, index) => (
+          <div key={trabajador.id} className="card" style={{ textAlign: 'center', padding: '1rem' }}>
+            <div style={{ fontSize: 'clamp(1.5rem, 5vw, 2rem)', fontWeight: 'bold', color: trabajador.color, marginBottom: '0.5rem' }}>
+              {estadisticas30Dias[trabajador.nombre] || 0}
+            </div>
+            <div style={{ color: '#6b7280', fontSize: 'clamp(0.75rem, 2vw, 0.875rem)' }}>Días - {trabajador.nombre}</div>
+            <div style={{ fontSize: '0.75rem', color: '#9ca3af', marginTop: '0.25rem' }}>Próximos 30 días</div>
           </div>
-          <div style={{ color: '#6b7280', fontSize: 'clamp(0.75rem, 2vw, 0.875rem)' }}>Días - Carmen</div>
-          <div style={{ fontSize: '0.75rem', color: '#9ca3af', marginTop: '0.25rem' }}>Próximos 30 días</div>
-        </div>
-
-        <div className="card" style={{ textAlign: 'center', padding: '1rem' }}>
-          <div style={{ fontSize: 'clamp(1.5rem, 5vw, 2rem)', fontWeight: 'bold', color: '#d946ef', marginBottom: '0.5rem' }}>
-            {estadisticas30Dias.Azucena}
-          </div>
-          <div style={{ color: '#6b7280', fontSize: 'clamp(0.75rem, 2vw, 0.875rem)' }}>Días - Azucena</div>
-          <div style={{ fontSize: '0.75rem', color: '#9ca3af', marginTop: '0.25rem' }}>Próximos 30 días</div>
-        </div>
+        ))}
 
         <div className="card" style={{ textAlign: 'center', padding: '1rem' }}>
           <div style={{ fontSize: 'clamp(1.5rem, 5vw, 2rem)', fontWeight: 'bold', color: '#10b981', marginBottom: '0.5rem' }}>
@@ -163,18 +162,15 @@ const EstadisticasSimples = () => {
                     border: '1px solid #e5e7eb'
                   }}
                 />
-                <Bar 
-                  dataKey="Carmen" 
-                  fill={trabajadores[0]?.color || '#0ea5e9'} 
-                  name="Carmen"
-                  radius={[4, 4, 0, 0]}
-                />
-                <Bar 
-                  dataKey="Azucena" 
-                  fill={trabajadores[1]?.color || '#d946ef'} 
-                  name="Azucena"
-                  radius={[4, 4, 0, 0]}
-                />
+                {trabajadores.map((trabajador) => (
+                  <Bar 
+                    key={trabajador.id}
+                    dataKey={trabajador.nombre} 
+                    fill={trabajador.color} 
+                    name={trabajador.nombre}
+                    radius={[4, 4, 0, 0]}
+                  />
+                ))}
               </BarChart>
             </ResponsiveContainer>
           </div>

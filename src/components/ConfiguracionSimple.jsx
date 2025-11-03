@@ -1,7 +1,7 @@
 import { useForm } from 'react-hook-form';
 import { useSelector, useDispatch } from 'react-redux';
 import { Settings, Save, User, Calendar } from 'lucide-react';
-import { actualizarFechaInicio, actualizarTrabajador } from '../store/turnosSlice';
+import { actualizarFechaInicioAPI, actualizarUsuarioAPI } from '../store/turnosSlice';
 
 const ConfiguracionSimple = () => {
   const dispatch = useDispatch();
@@ -17,26 +17,31 @@ const ConfiguracionSimple = () => {
     }
   });
 
-  const onSubmit = (data) => {
-    dispatch(actualizarFechaInicio(data.fechaInicio));
-    
-    dispatch(actualizarTrabajador({
-      id: 1,
-      datos: {
-        nombre: data.nombreCarmen,
-        color: data.colorCarmen
-      }
-    }));
-    
-    dispatch(actualizarTrabajador({
-      id: 2,
-      datos: {
-        nombre: data.nombreAzucena,
-        color: data.colorAzucena
-      }
-    }));
+  const onSubmit = async (data) => {
+    try {
+      await dispatch(actualizarFechaInicioAPI(data.fechaInicio)).unwrap();
+      
+      await Promise.all([
+        dispatch(actualizarUsuarioAPI({
+          id: trabajadores[0]?.id,
+          datos: {
+            nombre: data.nombreCarmen,
+            color: data.colorCarmen
+          }
+        })).unwrap(),
+        dispatch(actualizarUsuarioAPI({
+          id: trabajadores[1]?.id,
+          datos: {
+            nombre: data.nombreAzucena,
+            color: data.colorAzucena
+          }
+        })).unwrap()
+      ]);
 
-    alert('Configuración guardada exitosamente');
+      alert('Configuración guardada exitosamente');
+    } catch (error) {
+      alert('Error al guardar la configuración: ' + error.message);
+    }
   };
 
   const resetearFormulario = () => {
