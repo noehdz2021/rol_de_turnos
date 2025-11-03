@@ -38,11 +38,15 @@ git push
 
 ```
 NODE_ENV=production
+NODE_VERSION=20
 PORT=${{PORT}}
 DATABASE_URL=${{Postgres.DATABASE_URL}}
 ```
 
-Nota: `${{Postgres.DATABASE_URL}}` es la referencia automática a la base de datos PostgreSQL que creaste.
+Notas:
+- `NODE_VERSION=20` es necesario porque algunas dependencias requieren Node.js 20+
+- `${{Postgres.DATABASE_URL}}` es la referencia automática a la base de datos PostgreSQL que creaste
+- Railway también detectará Node.js 20 desde el archivo `.nvmrc` en el repositorio
 
 ## 🔨 Paso 5: Configurar el Build
 
